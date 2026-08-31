@@ -2,7 +2,8 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+import dataclasses
+from dataclasses import dataclass
 from typing import Any
 
 
@@ -13,7 +14,7 @@ class Option:
     id: str
     title: str
     text: str = ""
-    fields: dict[str, Any] = field(default_factory=dict)
+    fields: dict[str, Any] = dataclasses.field(default_factory=dict)
 
 
 @dataclass(frozen=True)
@@ -24,8 +25,8 @@ class HardRule:
     min: float | None = None
     max: float | None = None
     equals: Any | None = None
-    contains_any: list[str] = field(default_factory=list)
-    contains_none: list[str] = field(default_factory=list)
+    contains_any: list[str] = dataclasses.field(default_factory=list)
+    contains_none: list[str] = dataclasses.field(default_factory=list)
 
 
 @dataclass(frozen=True)
@@ -41,9 +42,9 @@ class SoftRule:
 class Profile:
     name: str
     query: str = ""
-    hard: list[HardRule] = field(default_factory=list)
-    soft: list[SoftRule] = field(default_factory=list)
-    weights: dict[str, float] = field(default_factory=dict)
+    hard: list[HardRule] = dataclasses.field(default_factory=list)
+    soft: list[SoftRule] = dataclasses.field(default_factory=list)
+    weights: dict[str, float] = dataclasses.field(default_factory=dict)
 
 
 @dataclass(frozen=True)

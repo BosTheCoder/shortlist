@@ -6,7 +6,7 @@ import pytest
 
 from shortlist import rank
 from shortlist.learning import LearnedWeights, fit
-from shortlist.models import Option, Profile
+from shortlist.models import Option, Profile, Shortlist
 from shortlist.store import FeedbackStore
 
 RANKERS = ["popularity", "learned"]
@@ -20,7 +20,7 @@ CANDIDATES = [
 PROFILE = Profile(name="thrifty")
 
 
-def rank_of(option_id: str, shortlist) -> int:
+def rank_of(option_id: str, shortlist: Shortlist) -> int:
     return next(r.rank for r in shortlist.results if r.option.id == option_id)
 
 

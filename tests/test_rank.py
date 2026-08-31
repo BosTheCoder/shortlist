@@ -7,13 +7,13 @@ import pytest
 from shortlist import rank
 from shortlist.embedding import HashingEmbedder, NullEmbedder
 from shortlist.fusion import reciprocal_rank_fusion
-from shortlist.models import HardRule, Option, Profile, SoftRule
+from shortlist.models import HardRule, Option, Profile, Shortlist, SoftRule
 from shortlist.serialisation import to_dict
 
 THREE = ["constraint", "lexical", "popularity"]
 
 
-def ids(shortlist) -> list[str]:
+def ids(shortlist: Shortlist) -> list[str]:
     return [result.option.id for result in shortlist.results]
 
 
@@ -42,7 +42,7 @@ def test_per_ranker_positions_match_the_hand_computation(dining_options, dining_
 class TestHardConstraintsAreAbsolute:
     def test_violating_options_never_appear_at_any_ranker_weighting(
         self,
-        dining_options,
+        dining_options: list[Option],
         dining_profile,
     ) -> None:
         # foxtrot is over budget and golf has shellfish; both would otherwise rank highly.
@@ -66,7 +66,7 @@ class TestHardConstraintsAreAbsolute:
 
     def test_violating_options_never_appear_with_the_constraint_ranker_switched_off(
         self,
-        dining_options,
+        dining_options: list[Option],
         dining_profile,
     ) -> None:
         result = rank(dining_options, dining_profile, rankers=["lexical", "popularity"])
@@ -76,7 +76,7 @@ class TestHardConstraintsAreAbsolute:
 
     def test_the_excluded_options_are_reported_with_the_rule_they_broke(
         self,
-        dining_options,
+        dining_options: list[Option],
         dining_profile,
     ) -> None:
         result = rank(dining_options, dining_profile)
@@ -88,7 +88,7 @@ class TestHardConstraintsAreAbsolute:
 class TestAbstention:
     def test_the_null_embedder_drops_semantic_and_leaves_the_rest_untouched(
         self,
-        dining_options,
+        dining_options: list[Option],
         dining_profile,
     ) -> None:
         with_null = rank(dining_options, dining_profile, embedder=NullEmbedder())
@@ -99,7 +99,7 @@ class TestAbstention:
 
     def test_a_working_embedder_puts_semantic_back_into_the_fusion(
         self,
-        dining_options,
+        dining_options: list[Option],
         dining_profile,
     ) -> None:
         result = rank(dining_options, dining_profile, embedder=HashingEmbedder())
@@ -109,7 +109,7 @@ class TestAbstention:
 
     def test_the_fused_score_only_counts_the_rankers_that_took_part(
         self,
-        dining_options,
+        dining_options: list[Option],
         dining_profile,
     ) -> None:
         result = rank(dining_options, dining_profile, rankers=["lexical", "popularity"])
