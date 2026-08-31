@@ -20,4 +20,4 @@ services:
       - ./app:/app
     environment:
       WATCHFILES_FORCE_POLLING: "true"
-    command: ["uvicorn", "shortlist.web.app:app", "--host", "0.0.0.0", "--port", "8080", "--reload", "--reload-dir", "/app"]
+    command: ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8080", "--reload", "--reload-dir", "/app"]

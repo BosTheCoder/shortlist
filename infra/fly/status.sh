@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # MANAGED BY demo-tools — DO NOT EDIT. Run `just sync` to update.
 set -euo pipefail
-APP="shortlist"
-HOSTNAMES=("shortlist.demos.buildwithbos.com")
+APP="bos-shortlist"
+HOSTNAMES=("bos-shortlist.demos.buildwithbos.com")
 fly status --app "$APP"
 echo
 echo "URLs:"

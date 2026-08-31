@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # MANAGED BY demo-tools — DO NOT EDIT. Run `just sync` to update.
 set -euo pipefail
-APP="shortlist"
+APP="bos-shortlist"
 read -r -p "Destroy ${APP}? This removes the Fly app(s) and cert. [y/N] " ans
 case "$ans" in
     [yY]|[yY][eE][sS]) ;;

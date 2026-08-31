@@ -15,8 +15,4 @@ primary_region = "lhr"
   memory = "256mb"
 
 
-[mounts]
-  source = "shortlist_data"
-  destination = "/data"
-  initial_size = "1gb"
 

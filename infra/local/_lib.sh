@@ -5,14 +5,14 @@
 # directory — not executed directly.
 set -euo pipefail
 
-APP="shortlist"
+APP="bos-shortlist"
 # The HOST-published port (compose maps host:container), which is what Tailscale
 # serve proxies to — NOT the port inside the container. It was previously named
 # after the container port, which invited hand-edits here that the next sync
 # silently reverted. Set the `host_port` answer instead of editing this line.
 HOST_PORT="8080"
 TS_HOST="bos-desktop.fish-grouper.ts.net"
-TS_PATH="/shortlist"
+TS_PATH="/bos-shortlist"
 URL="https://${TS_HOST}${TS_PATH}"
 
 # Base compose + the local overlay (restart policy + bind-mount + ROOT_PATH).

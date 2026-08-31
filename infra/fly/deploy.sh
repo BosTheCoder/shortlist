@@ -2,12 +2,12 @@
 # MANAGED BY demo-tools — DO NOT EDIT. Run `just sync` to update.
 set -euo pipefail
 
-APP="shortlist"
+APP="bos-shortlist"
 
 # Public hostnames this app answers on, from the `hostnames` answer. Defaults
 # to the one demo subdomain; an app that owns real domains lists them instead,
 # and an empty list means "just deploy" — no DNS, no certs.
-HOSTNAMES=("shortlist.demos.buildwithbos.com")
+HOSTNAMES=("bos-shortlist.demos.buildwithbos.com")
 
 HERE="$(cd "$(dirname "$0")" && pwd)"
 
