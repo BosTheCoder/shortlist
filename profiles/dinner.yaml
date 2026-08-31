@@ -1,0 +1,34 @@
+name: dinner
+query: "relaxed dinner spot, good vegetarian and fish, not too loud"
+
+# Hard rules are absolute. An option that breaks one is removed before any
+# ranker sees it, so no weighting can bring it back.
+hard:
+  - field: price_gbp_pp
+    max: 60
+  - field: cuisine_tags
+    contains_none: [shellfish]
+
+# Soft rules are min-max normalised across whatever survives, then weighted
+# against each other.
+soft:
+  - field: price_gbp_pp
+    prefer: low
+    weight: 1.0
+  - field: rating
+    prefer: high
+    weight: 1.5
+  - field: distance_km
+    prefer: low
+    weight: 1.0
+  - field: noise_level
+    prefer: low
+    weight: 0.5
+
+# Optional: how much each ranker counts in the fusion. Default is 1.0 each.
+weights:
+  constraint: 1.0
+  lexical: 1.0
+  semantic: 1.0
+  popularity: 1.0
+  learned: 1.0
