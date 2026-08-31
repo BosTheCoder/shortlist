@@ -1,0 +1,57 @@
+[project]
+name = "shortlist"
+version = "0.1.0"
+description = "Rank options against a written preference profile using several independent signals fused into one explainable ranking."
+readme = "README.md"
+requires-python = ">=3.12,<3.13"
+license = { file = "LICENSE" }
+authors = [{ name = "Kelvin \"Bosire\" Nyakundi" }]
+dependencies = [
+    "fastapi>=0.115",
+    "httpx>=0.28",
+    "jinja2>=3.1",
+    "numpy>=2.1",
+    "python-multipart>=0.0.20",
+    "pyyaml>=6.0",
+    "rich>=13.9",
+    "typer>=0.15",
+    "uvicorn>=0.34",
+]
+
+[project.scripts]
+shortlist = "shortlist.cli:app"
+
+[project.urls]
+Homepage = "https://github.com/BosTheCoder/shortlist"
+
+[dependency-groups]
+dev = [
+    "pyright>=1.1.390",
+    "pytest>=8.3",
+    "ruff>=0.9",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/shortlist"]
+
+[tool.ruff]
+line-length = 100
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM", "RUF"]
+
+[tool.pyright]
+include = ["src", "tests"]
+typeCheckingMode = "basic"
+pythonVersion = "3.12"
+venvPath = "."
+venv = ".venv"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
