@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block content %}
+<main class="layout">
+  <form id="controls"
+        hx-post="/demo/rank"
+        hx-target="#results"
+        hx-include="#results-state"
+        hx-trigger="change, input changed delay:200ms"
+        hx-indicator="#working">
+    <section class="panel">
+      <h2>Dataset</h2>
+      <div class="segmented">
+        {% for item in datasets %}
+        <label>
+          <input type="radio" name="dataset" value="{{ item.key }}" {% if item.key == dataset.key %}checked{% endif %}>
+          <span>{{ item.title }}</span>
+        </label>
+        {% endfor %}
+      </div>
+      <p class="blurb">{{ dataset.blurb }}</p>
+    </section>
+
+    <section class="panel">
+      <h2>What you are after</h2>
+      <textarea name="query" rows="3" spellcheck="false">{{ demo.profile.query }}</textarea>
+    </section>
+
+    <section class="panel">
+      <h2>Hard rules</h2>
+      {% for control in dataset.controls %}
+      {% set value = (demo.profile.hard | selectattr('field', 'equalto', control.field) | map(attribute=control.bound) | first) or control.default %}
+      <div class="slider">
+        <label for="c-{{ control.field }}">{{ control.label }}</label>
+        <input id="c-{{ control.field }}" type="range" name="{{ control.bound }}__{{ control.field }}"
+               min="{{ control.minimum }}" max="{{ control.maximum }}" step="{{ control.step }}" value="{{ value }}">
+        <output>{{ value }}</output>
+      </div>
+      {% endfor %}
+      <fieldset class="tags">
+        <legend>Exclude anything tagged</legend>
+        {% for tag in dataset.tags %}
+        <label class="chip">
+          <input type="checkbox" name="exclude" value="{{ tag }}" {% if tag in demo.excluded_tags %}checked{% endif %}>
+          <span>{{ tag }}</span>
+        </label>
+        {% endfor %}
+      </fieldset>
+    </section>
+
+    <section class="panel">
+      <h2>Rankers</h2>
+      <p class="blurb">Turn them on and off. The table re-sorts as you do.</p>
+      {% for name in all_rankers %}
+      <label class="ranker" for="r-{{ name }}">
+        <input id="r-{{ name }}" type="checkbox" name="rankers" value="{{ name }}" {% if name in active %}checked{% endif %}>
+        <span class="dot dot-{{ name }}"></span>
+        <span class="name">{{ name }}</span>
+      </label>
+      {% endfor %}
+    </section>
+  </form>
+
+  <div id="results">
+    {% include "_results.html" %}
+  </div>
+</main>
+{% endblock %}

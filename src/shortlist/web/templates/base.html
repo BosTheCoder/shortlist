@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>shortlist</title>
+  <link rel="stylesheet" href="/static/app.css">
+  <script src="/static/htmx.min.js" defer></script>
+  <link rel="icon" href="data:,">
+</head>
+<body>
+  <input type="checkbox" id="cold-start-dismiss" hidden>
+  <aside id="cold-start" role="status">
+    <span>This demo sleeps when nobody is using it, so the first load can take a few seconds. It is awake now.</span>
+    <label for="cold-start-dismiss" class="dismiss" title="Dismiss">Dismiss</label>
+  </aside>
+
+  <header class="masthead">
+    <div>
+      <h1>shortlist</h1>
+      <p>Several independent rankers, fused into one ranking you can argue with.</p>
+    </div>
+    <a class="repo" href="https://github.com/BosTheCoder/shortlist">GitHub</a>
+  </header>
+
+  {% block content %}{% endblock %}
+
+  <script>
+    document.addEventListener('input', function (event) {
+      if (event.target.type !== 'range') return;
+      var readout = event.target.parentElement.querySelector('output');
+      if (readout) readout.value = event.target.value;
+    });
+  </script>
+</body>
+</html>

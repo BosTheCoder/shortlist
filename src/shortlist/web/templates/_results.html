@@ -1,0 +1,142 @@
+{% set best = scores | max if scores else 0 %}
+{% set worst = scores | min if scores else 0 %}
+<div id="working" class="working">ranking…</div>
+
+<div id="results-state"
+     hx-post="/demo/rank"
+     hx-target="#results"
+     hx-include="#controls"
+     hx-trigger="change">
+  <input type="hidden" name="focus" value="{{ focused.option.id if focused else '' }}">
+  <div class="compare-picker">
+    <span>Why did two options swap?</span>
+    <select name="compare_a">
+      <option value="">pick one</option>
+      {% for result in shortlist.results %}
+      <option value="{{ result.option.id }}" {% if compare and compare[0].option.id == result.option.id %}selected{% endif %}>{{ result.rank }}. {{ result.option.title }}</option>
+      {% endfor %}
+    </select>
+    <select name="compare_b">
+      <option value="">pick another</option>
+      {% for result in shortlist.results %}
+      <option value="{{ result.option.id }}" {% if compare and compare[1].option.id == result.option.id %}selected{% endif %}>{{ result.rank }}. {{ result.option.title }}</option>
+      {% endfor %}
+    </select>
+  </div>
+</div>
+
+<div class="summary">
+  <strong>{{ shortlist.results | length }}</strong> options ranked by
+  {% if shortlist.rankers %}<span class="ranker-list">{% for name in shortlist.rankers %}<span class="dot dot-{{ name }}"></span>{{ name }}{% if not loop.last %}, {% endif %}{% endfor %}</span>
+  {% else %}nothing at all — switch a ranker on{% endif %}.
+  {% if shortlist.abstained %}<span class="muted">Abstained: {{ shortlist.abstained | join(', ') }}.</span>{% endif %}
+</div>
+
+{% if shortlist.results %}
+<table class="results">
+  <thead>
+    <tr><th>#</th><th>Option</th><th>Fused score</th><th class="num">Score</th><th class="num">Spread</th></tr>
+  </thead>
+  <tbody>
+    {% for result in shortlist.results %}
+    {% set share = 100 if best == worst else (25 + 75 * (result.score - worst) / (best - worst)) %}
+    <tr data-option-id="{{ result.option.id }}"
+        class="{% if focused and focused.option.id == result.option.id %}focused{% endif %}"
+        hx-post="/demo/rank?focus={{ result.option.id }}"
+        hx-target="#results"
+        hx-include="#controls, #results-state">
+      <td class="num rank">{{ result.rank }}</td>
+      <td>
+        <div class="title">{{ result.option.title }}</div>
+        <div class="fields">
+          {%- for rule in dataset.soft %}{{ rule.field }} {{ result.option.fields.get(rule.field, '?') }} · {% endfor -%}
+          {{ result.option.fields.get(dataset.tag_field, []) | join(', ') }}
+        </div>
+      </td>
+      <td class="bar-cell">
+        <div class="bar" style="width: {{ share | round(1) }}%">
+          {% for view in result.per_ranker %}
+          <span class="seg seg-{{ view.ranker }}" style="flex: {{ view.contribution }}" title="{{ view.ranker }}: rank {{ view.rank }}"></span>
+          {% endfor %}
+        </div>
+      </td>
+      <td class="num mono">{{ '%.5f' | format(result.score) }}</td>
+      <td class="num">
+        {% set spread = result.disagreement %}
+        <span class="spread {% if spread == 0 %}s0{% elif spread < 1 %}s1{% elif spread < 2.5 %}s2{% else %}s3{% endif %}">{{ '%.1f' | format(spread) }}</span>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endif %}
+
+{% if focused %}
+<section class="panel explain">
+  <h2>{{ focused.option.title }} — placed {{ focused.rank }}</h2>
+  <p class="quote">{{ focused.option.text }}</p>
+  <div class="explain-grid">
+    <div>
+      <h3>Hard rules</h3>
+      <ul class="rules">
+        {% for check in focused.hard_checks %}
+        <li class="{{ 'pass' if check.passed else 'fail' }}">
+          <code>{{ check.rule.field }}</code>
+          {% if check.rule.max is not none %}≤ {{ check.rule.max }}{% endif %}
+          {% if check.rule.min is not none %}≥ {{ check.rule.min }}{% endif %}
+          {% if check.rule.contains_none %}without {{ check.rule.contains_none | join(', ') }}{% endif %}
+          <span class="value">is {{ check.value }}</span>
+        </li>
+        {% else %}
+        <li class="muted">No hard rules are set.</li>
+        {% endfor %}
+      </ul>
+    </div>
+    <div>
+      <h3>Where each ranker put it</h3>
+      <ul class="views">
+        {% for view in focused.per_ranker | sort(attribute='rank') %}
+        <li>
+          <span class="dot dot-{{ view.ranker }}"></span>
+          <span class="name">{{ view.ranker }}</span>
+          <span class="place">#{{ view.rank }}</span>
+          <span class="mono muted">score {{ '%.4f' | format(view.score) }} · contributes {{ '%.5f' | format(view.contribution) }}</span>
+        </li>
+        {% endfor %}
+      </ul>
+      <p class="muted">Spread across the rankers: {{ '%.2f' | format(focused.disagreement) }}.</p>
+    </div>
+  </div>
+</section>
+{% endif %}
+
+{% if compare %}
+<section class="panel explain">
+  <h2>{{ compare[0].option.title }} <span class="muted">vs</span> {{ compare[1].option.title }}</h2>
+  <p class="muted">Placed {{ compare[0].rank }} and {{ compare[1].rank }}. The ranker at the top of this list moved them apart the most.</p>
+  <table class="diff">
+    <thead><tr><th>Ranker</th><th class="num">{{ compare[0].option.title }}</th><th class="num">{{ compare[1].option.title }}</th><th class="num">Gap</th></tr></thead>
+    <tbody>
+      {% for row in comparison %}
+      <tr>
+        <td><span class="dot dot-{{ row.ranker }}"></span> {{ row.ranker }}</td>
+        <td class="num">#{{ row.left.rank }}</td>
+        <td class="num">#{{ row.right.rank }}</td>
+        <td class="num mono {{ 'up' if row.delta > 0 else ('down' if row.delta < 0 else '') }}">{{ '%+.5f' | format(row.delta) }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+{% endif %}
+
+{% if shortlist.excluded %}
+<details class="excluded">
+  <summary>{{ shortlist.excluded | length }} filtered out by the hard rules</summary>
+  <ul>
+    {% for item in shortlist.excluded %}
+    <li><strong>{{ item.option.title }}</strong> — failed {{ item.failed | map(attribute='field') | join(', ') }}</li>
+    {% endfor %}
+  </ul>
+</details>
+{% endif %}
