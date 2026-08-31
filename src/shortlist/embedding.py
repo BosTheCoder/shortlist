@@ -95,3 +95,21 @@ class OpenAICompatibleEmbedder:
         response.raise_for_status()
         payload = response.json()
         return [item["embedding"] for item in payload["data"]]
+
+
+class PrecomputedEmbedder:
+    """Serves vectors computed ahead of time, and falls back for anything new.
+
+    The bundled datasets ship their option vectors in a `.npz`, so a demo
+    request only has to embed the query the visitor just typed.
+    """
+
+    def __init__(self, vectors: dict[str, list[float]], fallback: Embedder) -> None:
+        self.vectors = vectors
+        self.fallback = fallback
+
+    def embed(self, texts: list[str]) -> list[list[float]]:
+        missing = [text for text in texts if text not in self.vectors]
+        if missing:
+            self.vectors.update(zip(missing, self.fallback.embed(missing), strict=True))
+        return [self.vectors[text] for text in texts]
