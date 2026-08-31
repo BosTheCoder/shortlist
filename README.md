@@ -203,7 +203,7 @@ Reproduce these yourself; there is no benchmark harness hiding the method. The 5
 figure was 1,950 ms before the ranker positions were put in a dict instead of being
 found with `list.index` per option per ranker.
 
-Size: 1,513 lines of Python across 23 modules, largest file 128 lines, 876 lines of tests, 69 of them.
+Size: 1,513 lines of Python across 23 modules, largest file 128 lines. 69 tests in 876 lines.
 
 ## The demo
 
