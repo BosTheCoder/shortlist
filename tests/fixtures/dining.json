@@ -1,0 +1,65 @@
+[
+  {
+    "id": "alpha",
+    "title": "Alpha House",
+    "text": "quiet vegetarian dinner spot with a calm dining room",
+    "price_gbp_pp": 25,
+    "rating": 4.8,
+    "review_count": 600,
+    "tags": ["vegetarian", "quiet"]
+  },
+  {
+    "id": "bravo",
+    "title": "Bravo Rooms",
+    "text": "quiet vegetarian dinner menu with a lively terrace",
+    "price_gbp_pp": 30,
+    "rating": 4.6,
+    "review_count": 400,
+    "tags": ["vegetarian"]
+  },
+  {
+    "id": "charlie",
+    "title": "Charlie Grill",
+    "text": "quiet dinner mostly steak",
+    "price_gbp_pp": 44,
+    "rating": 4.5,
+    "review_count": 30,
+    "tags": ["grill"]
+  },
+  {
+    "id": "delta",
+    "title": "Delta Bar",
+    "text": "big loud sports bar",
+    "price_gbp_pp": 55,
+    "rating": 4.2,
+    "review_count": 900,
+    "tags": ["bar"]
+  },
+  {
+    "id": "echo",
+    "title": "Echo Canteen",
+    "text": "vegetarian canteen quick and cheap",
+    "price_gbp_pp": 20,
+    "rating": 3.9,
+    "review_count": 120,
+    "tags": ["vegetarian"]
+  },
+  {
+    "id": "foxtrot",
+    "title": "Foxtrot Table",
+    "text": "quiet vegetarian dinner tasting menu",
+    "price_gbp_pp": 90,
+    "rating": 5.0,
+    "review_count": 800,
+    "tags": ["vegetarian", "quiet"]
+  },
+  {
+    "id": "golf",
+    "title": "Golf Shack",
+    "text": "quiet vegetarian dinner counter with shellfish specials",
+    "price_gbp_pp": 28,
+    "rating": 4.9,
+    "review_count": 700,
+    "tags": ["vegetarian", "shellfish"]
+  }
+]

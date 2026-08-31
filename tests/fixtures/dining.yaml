@@ -1,0 +1,14 @@
+name: dining-fixture
+query: "quiet vegetarian dinner"
+hard:
+  - field: price_gbp_pp
+    max: 60
+  - field: tags
+    contains_none: [shellfish]
+soft:
+  - field: price_gbp_pp
+    prefer: low
+    weight: 1.0
+  - field: rating
+    prefer: high
+    weight: 1.5
