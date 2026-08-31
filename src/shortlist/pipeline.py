@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import json
-import statistics
+import math
 from collections.abc import Sequence
 from dataclasses import asdict
 
@@ -31,6 +31,14 @@ def run_id(options: Sequence[Option], profile: Profile, ranker_names: Sequence[s
     return hashlib.sha256(canonical.encode()).hexdigest()[:12]
 
 
+def _spread(ranks: Sequence[int]) -> float:
+    """How much the rankers disagreed: the population standard deviation of their ranks."""
+    if len(ranks) < 2:
+        return 0.0
+    mean = sum(ranks) / len(ranks)
+    return math.sqrt(sum((rank - mean) ** 2 for rank in ranks) / len(ranks))
+
+
 def rank(
     options: Sequence[Option],
     profile: Profile,
@@ -54,6 +62,7 @@ def rank(
             survivors.append(option)
 
     orderings: dict[str, list[str]] = {}
+    positions: dict[str, dict[str, int]] = {}
     scores_by_ranker: dict[str, dict[str, float]] = {}
     abstained: list[str] = []
     for name in names:
@@ -63,6 +72,7 @@ def rank(
             continue
         ordered = order(scored)
         orderings[name] = [s.option_id for s in ordered]
+        positions[name] = {s.option_id: index for index, s in enumerate(ordered, start=1)}
         scores_by_ranker[name] = {s.option_id: s.score for s in ordered}
 
     fused = reciprocal_rank_fusion(orderings, profile.weights, k=k)
@@ -73,13 +83,11 @@ def rank(
         views = [
             RankerView(
                 ranker=name,
-                rank=ordering.index(option.id) + 1,
+                rank=places[option.id],
                 score=scores_by_ranker[name][option.id],
-                contribution=contribution(
-                    profile.weights.get(name, 1.0), ordering.index(option.id) + 1, k
-                ),
+                contribution=contribution(profile.weights.get(name, 1.0), places[option.id], k),
             )
-            for name, ordering in orderings.items()
+            for name, places in positions.items()
         ]
         ranks = [view.rank for view in views]
         results.append(
@@ -88,7 +96,7 @@ def rank(
                 rank=position,
                 score=fused.get(option.id, 0.0),
                 per_ranker=views,
-                disagreement=statistics.pstdev(ranks) if len(ranks) > 1 else 0.0,
+                disagreement=_spread(ranks),
                 hard_checks=checks(option, profile.hard),
             )
         )

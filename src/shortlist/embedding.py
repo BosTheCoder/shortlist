@@ -45,11 +45,17 @@ class HashingEmbedder:
 
     def __init__(self, dim: int = DEFAULT_DIM) -> None:
         self.dim = dim
+        self._buckets: dict[str, tuple[int, float]] = {}
 
-    def _index_and_sign(self, token: str) -> tuple[int, float]:
-        digest = hashlib.blake2b(token.encode(), digest_size=8).digest()
-        value = int.from_bytes(digest, "big")
-        return value % self.dim, 1.0 if value >> 63 & 1 else -1.0
+    def _bucket(self, token: str) -> tuple[int, float]:
+        """Which dimension a token lands in, and with which sign."""
+        cached = self._buckets.get(token)
+        if cached is None:
+            digest = hashlib.blake2b(token.encode(), digest_size=8).digest()
+            value = int.from_bytes(digest, "big")
+            cached = (value % self.dim, 1.0 if value >> 63 & 1 else -1.0)
+            self._buckets[token] = cached
+        return cached
 
     def embed(self, texts: list[str]) -> list[list[float]]:
         vectors: list[list[float]] = []
@@ -57,12 +63,16 @@ class HashingEmbedder:
             counts: dict[str, int] = {}
             for token in tokenize(text):
                 counts[token] = counts.get(token, 0) + 1
-            vector = [0.0] * self.dim
+            # Sparse until the last moment: a text touches a handful of the dimensions.
+            weights: dict[int, float] = {}
             for token, count in counts.items():
-                index, sign = self._index_and_sign(token)
-                vector[index] += sign * (1.0 + math.log(count))
-            norm = math.sqrt(sum(value * value for value in vector))
-            vectors.append([value / norm for value in vector] if norm else vector)
+                index, sign = self._bucket(token)
+                weights[index] = weights.get(index, 0.0) + sign * (1.0 + math.log(count))
+            norm = math.sqrt(sum(value * value for value in weights.values())) or 1.0
+            vector = [0.0] * self.dim
+            for index, value in weights.items():
+                vector[index] = value / norm
+            vectors.append(vector)
         return vectors
 
 
